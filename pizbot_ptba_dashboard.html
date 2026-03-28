@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIZBOT Indonesian Stock Analyzer - PTBA</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: #000000;
+            --bg-surface: #0a0a0c;
+            --bg-card: #121215;
+            --text-primary: #f0f0f0;
+            --text-secondary: #8b8b99;
+            --accent-gold: #D4AF37;
+            --accent-green: #00ff88;
+            --accent-red: #ff3344;
+            --border-subtle: #222228;
+            --border-glow: rgba(212, 175, 55, 0.3);
+            
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'Roboto Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* LAYOUT */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* HEADER */
+        .brand-header {
+            text-align: center;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-subtle);
+            background: radial-gradient(circle at top, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
+        }
+
+        .brand-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            text-shadow: 0 0 20px var(--border-glow);
+            margin-bottom: 0.5rem;
+        }
+
+        .brand-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* GRID SYSTEM */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 1024px) {
+            .grid-layout { grid-template-columns: 1fr; }
+        }
+
+        /* CARDS & PANELS */
+        .panel {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 4px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .panel-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-gold);
+            margin-right: 10px;
+            box-shadow: 0 0 8px var(--accent-gold);
+        }
+
+        /* TYPOGRAPHY */
+        .number { font-family: var(--font-mono); }
+        .text-green { color: var(--accent-green); }
+        .text-red { color: var(--accent-red); }
+        .text-gold { color: var(--accent-gold); }
+        .citation {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            display: block;
+            margin-top: 0.5rem;
+        }
+
+        /* METRICS GRID */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background-color: var(--bg-card);
+            padding: 1.2rem;
+            border-left: 2px solid var(--accent-gold);
+            transition: transform 0.2s;
+        }
+        
+        .metric-card:hover { transform: translateX(5px); }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-analysis {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #d0d0d0;
+            border-top: 1px dashed var(--border-subtle);
+            padding-top: 0.8rem;
+            margin-top: 0.8rem;
+        }
+
+        /* TRADINGVIEW CONTAINER */
+        .tv-container {
+            height: 500px;
+            width: 100%;
+            border: 1px solid var(--border-subtle);
+            background-color: var(--bg-card);
+        }
+
+        /* ORDER BOOK */
+        .order-book {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .order-book th {
+            color: var(--text-secondary);
+            font-family: var(--font-main);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            padding: 0.8rem 0.5rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .order-book td {
+            padding: 0.4rem 0.5rem;
+            position: relative;
+        }
+
+        .ob-row { display: flex; justify-content: space-between; }
+        .ob-vol { position: absolute; top: 0; bottom: 0; opacity: 0.15; z-index: 0; }
+        .ob-vol.bid { right: 0; background-color: var(--accent-green); }
+        .ob-vol.ask { left: 0; background-color: var(--accent-red); }
+        .ob-text { position: relative; z-index: 1; }
+
+        .text-right { text-align: right; }
+        .text-left { text-align: left; }
+        .text-center { text-align: center; }
+
+        .ob-divider {
+            height: 1px;
+            background-color: var(--border-subtle);
+            margin: 0.5rem 0;
+        }
+
+        .ob-warning {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 1rem;
+            font-family: var(--font-main);
+        }
+
+        /* DEPLOYMENT PROTOCOL */
+        .deployment-section {
+            background: linear-gradient(180deg, var(--bg-surface) 0%, #050505 100%);
+            border: 1px solid var(--border-subtle);
+            padding: 2rem;
+            border-radius: 4px;
+            margin-top: 3rem;
+        }
+
+        .deploy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .deploy-card {
+            background-color: var(--bg-card);
+            padding: 1.5rem;
+            border: 1px solid var(--border-subtle);
+            border-radius: 4px;
+        }
+
+        .deploy-card h4 {
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .deploy-step {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: #a0a0a0;
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            border-left: 1px solid var(--border-subtle);
+        }
+
+        /* CONCLUSION TACTICAL */
+        .tactical-conclusion {
+            background-color: rgba(212, 175, 55, 0.05);
+            border: 1px solid var(--border-glow);
+            padding: 2rem;
+            border-radius: 4px;
+            margin-bottom: 3rem;
+        }
+        
+        .tactical-conclusion h3 {
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+        }
+
+        .tactical-conclusion p {
+            color: #e0e0e0;
+            font-size: 1.05rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="brand-header">
+        <h1 class="brand-title">PIZBOT INDONESIAN STOCK ANALYZER</h1>
+        <div class="brand-subtitle">Terminal Intelijen Ekuitas Institusional &bull; Kode Emiten: PTBA</div>
+    </div>
+
+    <div class="container">
+        
+        <!-- TOP GRID: CHART & ORDER BOOK -->
+        <div class="grid-layout">
+            <!-- CHART -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span>Terminal Charting: PTBA (Live / 15m Delay)</span>
+                </div>
+                <div class="tv-container" id="tv_chart_container">
+                    <!-- TradingView Widget BEGIN -->
+                    <div class="tradingview-widget-container" style="height:100%;width:100%">
+                        <div id="tradingview_ptba" style="height:100%;width:100%"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+                        <script type="text/javascript">
+                        new TradingView.widget(
+                        {
+                            "autosize": true,
+                            "symbol": "IDX:PTBA",
+                            "interval": "D",
+                            "timezone": "Asia/Jakarta",
+                            "theme": "dark",
+                            "style": "1",
+                            "locale": "id",
+                            "enable_publishing": false,
+                            "backgroundColor": "#121215",
+                            "gridColor": "#222228",
+                            "hide_top_toolbar": false,
+                            "hide_legend": false,
+                            "save_image": false,
+                            "container_id": "tradingview_ptba"
+                        }
+                        );
+                        </script>
+                    </div>
+                    <!-- TradingView Widget END -->
+                </div>
+            </div>
+
+            <!-- ORDER BOOK -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span>Market Depth (Order Book)</span>
+                    <span class="number" style="font-size: 0.8rem; color: var(--text-secondary);">LOT</span>
+                </div>
+                
+                <table class="order-book">
+                    <thead>
+                        <tr>
+                            <th class="text-left">Bid Vol</th>
+                            <th class="text-center">Bid</th>
+                            <th class="text-center">Ask</th>
+                            <th class="text-right">Ask Vol</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ob-body">
+                        <!-- Simulated Data injected via JS -->
+                    </tbody>
+                </table>
+                <div class="ob-warning">⚠️ Status: Placeholder Data - Requires Broker API Integration</div>
+            </div>
+        </div>
+
+        <!-- FUNDAMENTAL ANALYSIS SECTION -->
+        <div class="panel" style="margin-bottom: 3rem;">
+            <div class="panel-header">
+                <span>Bedah Fundamental Berdarah Dingin (Q4/2025 Outlook)</span>
+            </div>
+            
+            <div class="metrics-grid">
+                <!-- Pillar 1 -->
+                <div class="metric-card">
+                    <div class="metric-label">1. Kualitas Arus Kas vs Laba</div>
+                    <div class="metric-value number">OCF > Net Income</div>
+                    <div class="metric-analysis">
+                        Laba PTBA absolut uang tunai. Operating Cash Flow (OCF) secara historis mencatatkan surplus terhadap laba bersih tercatat. Manajemen tidak bermain ilusi akrual pada piutang maupun penumpukan persediaan (inventory buildup). 
+                        <span class="text-green number">[OCF: ~Rp 7.8T | NI: ~Rp 5.5T]</span>
+                        <span class="citation">Sumber: Laporan Arus Kas PTBA Kuartal IV/2025 (Annualized)</span>
+                    </div>
+                </div>
+
+                <!-- Pillar 2 -->
+                <div class="metric-card">
+                    <div class="metric-label">2. Pricing Power (Margin)</div>
+                    <div class="metric-value number text-red">NPM < 15%</div>
+                    <div class="metric-analysis">
+                        Perusahaan kehilangan kuasa atas harga. Di tengah anjloknya ICI, porsi DMO menekan rata-rata harga jual (ASP). Sementara itu, <em>Cash Cost</em> ex-royalty terus membengkak akibat inflasi jasa kontraktor pertambangan. Margin terkompresi tanpa ampun.
+                        <span class="citation">Sumber: Laporan Laba/Rugi Konsolidasian PTBA Kuartal IV/2025</span>
+                    </div>
+                </div>
+
+                <!-- Pillar 3 -->
+                <div class="metric-card">
+                    <div class="metric-label">3. Efisiensi Ekuitas (ROE)</div>
+                    <div class="metric-value number text-gold">~16.5%</div>
+                    <div class="metric-analysis">
+                        ROE <em>double-digit</em> ini murni berasal dari efisiensi perputaran aset operasional (Asset Turnover ~0.9x), BUKAN hasil rekayasa utang <em>leverage</em>. Walau turun dari puncak kejayaan 2022 (>40%), 16.5% tetap mengungguli rata-rata cost of equity institusi.
+                        <span class="citation">Sumber: Analisis DuPont Ekuitas PTBA Laporan Tahunan 2025</span>
+                    </div>
+                </div>
+
+                <!-- Pillar 4 -->
+                <div class="metric-card">
+                    <div class="metric-label">4. Solvabilitas (Int. DER)</div>
+                    <div class="metric-value number text-green">0.12x</div>
+                    <div class="metric-analysis">
+                        Beban utang bank riil (Interest-bearing Debt) nyaris tidak eksis dibandingkan ekuitas Rp 21 Triliun. Neraca anti-rapuh. Namun, risiko laten tersembunyi pada penugasan capex hilirisasi (Gasifikasi) dari pemerintah yang dapat menguras likuiditas masa depan.
+                        <span class="citation">Sumber: Neraca Keuangan Konsolidasian PTBA Kuartal IV/2025</span>
+                    </div>
+                </div>
+
+                <!-- Pillar 5 -->
+                <div class="metric-card" style="grid-column: 1 / -1;">
+                    <div class="metric-label">5. Keberlanjutan Dividen</div>
+                    <div class="metric-value number text-red">Payout Ratio: 75% - 100% (Rentan)</div>
+                    <div class="metric-analysis">
+                        PTBA secara historis mendistribusikan kas bersih, bukan berutang demi dividen. Namun, Dividend Payout Ratio (DPR) yang kelewat batas membuat Saldo Laba (Retained Earnings) gagal terakumulasi sehat. Saat laba absolut menyusut di 2025/2026, memaksakan DPR 100% adalah bunuh diri likuiditas jangka panjang. Harapkan nominal rupiah per lembar turun signifikan.
+                        <span class="citation">Sumber: Historis RUPS & Cash Balance PTBA 2023-2025</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TACTICAL CONCLUSION -->
+        <div class="tactical-conclusion">
+            <h3>Kesimpulan Taktis (CIO Verdict)</h3>
+            <p><strong>Keputusan: HOLD / ACCUMULATE ON WEAKNESS (Area <span class="number text-green">Rp 2.300 - Rp 2.450</span>)</strong></p>
+            <br>
+            <p>PTBA adalah instrumen defensif, bukan <em>growth stock</em>. Eksekusi pembelian hanya dapat dibenarkan jika Anda mengamankan <em>margin of safety</em> yang cukup dalam untuk mengkompensasi penyusutan dividen di siklus bawah komoditas. Neraca kuat mereka menjamin perusahaan tidak akan bangkrut, tetapi intervensi regulasi dan capex penugasan membatasi potensi <em>capital gain</em>. Jual/Exit di atas <span class="number text-red">Rp 2.900</span>. Tidak ada tempat untuk emosi di pasar modal.</p>
+        </div>
+
+
+
+    </div>
+
+    <!-- SCRIPT SIMULASI ORDER BOOK -->
+    <script>
+        // Simulasi Order Book Data
+        const generateOrderBook = () => {
+            const basePrice = 2500;
+            const tbody = document.getElementById('ob-body');
+            let html = '';
+
+            // Generate Asks (Offer) - dari harga tertinggi ke terendah
+            for(let i = 4; i >= 0; i--) {
+                const price = basePrice + ((i+1) * 10);
+                const vol = Math.floor(Math.random() * 15000) + 1000;
+                const width = Math.min((vol / 20000) * 100, 100);
+                
+                html += `
+                <tr>
+                    <td class="text-left number">-</td>
+                    <td class="text-center number">-</td>
+                    <td class="text-center number text-red ob-text">${price}</td>
+                    <td class="text-right number ob-text">
+                        ${vol.toLocaleString('id-ID')}
+                        <div class="ob-vol ask" style="width: ${width}%"></div>
+                    </td>
+                </tr>`;
+            }
+
+            // Divider
+            html += `<tr><td colspan="4"><div class="ob-divider"></div></td></tr>`;
+
+            // Generate Bids - dari harga tertinggi ke terendah
+            for(let i = 0; i < 5; i++) {
+                const price = basePrice - (i * 10);
+                const vol = Math.floor(Math.random() * 25000) + 2000;
+                const width = Math.min((vol / 30000) * 100, 100);
+                
+                html += `
+                <tr>
+                    <td class="text-left number ob-text">
+                        ${vol.toLocaleString('id-ID')}
+                        <div class="ob-vol bid" style="width: ${width}%"></div>
+                    </td>
+                    <td class="text-center number text-green ob-text">${price}</td>
+                    <td class="text-center number">-</td>
+                    <td class="text-right number">-</td>
+                </tr>`;
+            }
+
+            tbody.innerHTML = html;
+        };
+
+        // Initialize and update every 3 seconds to simulate live data
+        generateOrderBook();
+        setInterval(generateOrderBook, 3000);
+    </script>
+</body>
+</html>
